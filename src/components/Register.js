@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Alert, Row, Col, Form, Input, Button, Typography } from 'antd';
+import { Alert, Row, Form, Input, Button, Typography } from 'antd';
 import { Link } from "react-router-dom";
 
 import { GetCookie } from '../helpers';

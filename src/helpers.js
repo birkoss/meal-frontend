@@ -3,7 +3,6 @@ import Cookies from 'universal-cookie';
 
 export function ApiGetToken() {
     const token = GetCookie('token')
-    console.log(token);
     return (token === undefined ? "" : token)
 }
 
