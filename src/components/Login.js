@@ -97,7 +97,7 @@ class Login extends Component {
 
                     <Form layout="vertical" name="basic" onFinish={values => this.onLoginFinish(values)} onFinishFailed={error => this.onFinishFailed(error)}>
                         <Form.Item label="Email" name="email" rules={[{ required: true, message: 'Please input your email!' }]}>
-                            <Input type="emai   l" />
+                            <Input type="email" />
                         </Form.Item>
 
                         <Form.Item label="Password" name="password" rules={[{ required: true, message: 'Please input your password!' }]}>

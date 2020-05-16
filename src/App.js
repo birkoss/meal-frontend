@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import { Layout, Menu, Breadcrumb } from 'antd';
 
 import Login from './components/Login';
@@ -40,6 +41,14 @@ class App extends Component {
 		});
 	}
 
+	onLogout() {
+		ApiSetToken("");
+
+		this.setState({
+			token: ""
+		});
+	}
+
 	render() {
 
 		if (this.state.token === '') {
@@ -48,27 +57,38 @@ class App extends Component {
 			);
 		} else {
 			return (
-				<Layout className="layout">
-					<Header>
-					<div className="logo" />
-					<Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']}>
-						<Menu.Item key="1">nav 1</Menu.Item>
-						<Menu.Item key="2">nav 2</Menu.Item>
-						<Menu.Item key="3">nav 3</Menu.Item>
-					</Menu>
-					</Header>
-					<Content style={{ padding: '0 50px' }}>
-					<Breadcrumb style={{ margin: '16px 0' }}>
-						<Breadcrumb.Item>Home</Breadcrumb.Item>
-						<Breadcrumb.Item>List</Breadcrumb.Item>
-						<Breadcrumb.Item>App</Breadcrumb.Item>
-					</Breadcrumb>
-					<div className="site-layout-content">
-						<Meals token={ this.state.token } />
-					</div>
-					</Content>
-					<Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
-				</Layout>
+				<Router>
+					<Layout className="layout">
+						<Header>
+						<div className="logo" />
+						<Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']}>
+							<Menu.Item key="1">
+								<Link to="/">Home</Link>
+							</Menu.Item>
+							<Menu.Item key="2">
+								<Link to="/dashboard">nav 2</Link>
+							</Menu.Item>
+							<Menu.Item key="3" onClick={() => this.onLogout()}>Logout</Menu.Item>
+						</Menu>
+						</Header>
+						<Content style={{ padding: '0 50px' }}>
+							<div className="site-layout-content">
+								<Switch>
+									<Route exact path="/">
+										<Meals token={ this.state.token } />
+									</Route>
+									<Route path="/about">
+										about
+									</Route>
+									<Route path="/dashboard">
+										dash
+									</Route>
+								</Switch>
+							</div>
+						</Content>
+						<Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
+					</Layout>
+				</Router>
 			);
 		}
 	}
