@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import { Layout, Menu, Breadcrumb } from 'antd';
+import { BrowserRouter as Router, Switch, Route, Link, Redirect } from "react-router-dom";
+import { Layout, Menu } from 'antd';
 
 import Login from './components/Login';
+import Register from './components/Register';
 import Meals from './components/Meals';
 
 import { ApiGetToken, ApiSetToken } from './helpers';
@@ -10,7 +11,6 @@ import { ApiGetToken, ApiSetToken } from './helpers';
 import 'antd/dist/antd.css';
 
 import './App.css';
-
 
 const { Header, Content, Footer } = Layout;
 
@@ -39,6 +39,8 @@ class App extends Component {
 		this.setState({
 			token
 		});
+
+		this.props.history.push('/');
 	}
 
 	onLogout() {
@@ -53,7 +55,23 @@ class App extends Component {
 
 		if (this.state.token === '') {
 			return (
-				<Login onLogin={ token => this.onLogin(token) } />
+				<Router>
+					<Layout className="layout">
+						<Content className="layout-onepager">
+							<div className="site-layout-content">
+								<Switch>
+									<Route path="/login">
+										<Login onLogin={ token => this.onLogin(token) } />
+									</Route>
+									<Route path="/register">
+										<Register onRegister={ token => this.onLogin(token) } />
+									</Route>
+									<Redirect to="/login" />
+								</Switch>
+							</div>
+						</Content>
+					</Layout>
+				</Router>
 			);
 		} else {
 			return (
@@ -61,7 +79,7 @@ class App extends Component {
 					<Layout className="layout">
 						<Header>
 						<div className="logo" />
-						<Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']}>
+						<Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
 							<Menu.Item key="1">
 								<Link to="/">Home</Link>
 							</Menu.Item>

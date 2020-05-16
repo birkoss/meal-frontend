@@ -1,12 +1,12 @@
 import React, { Component, Fragment } from 'react';
-import { Alert, Row, Form, Input, Button, Typography } from 'antd';
+import { Alert, Row, Col, Form, Input, Button, Typography } from 'antd';
 import { Link } from "react-router-dom";
 
 import { GetCookie } from '../helpers';
 
 const { Title } = Typography;
 
-class Login extends Component {
+class Register extends Component {
     constructor(props) {
         super(props);
 
@@ -16,7 +16,7 @@ class Login extends Component {
     }
 
     onFormFinish(values) {
-        fetch('http://localhost:8000/api/login/', {
+        fetch('http://localhost:8000/api/register/', {
 			method: 'POST',
 			headers: {
 				'Content-type': 'application/json',
@@ -30,7 +30,7 @@ class Login extends Component {
             .then(res => res.json())
             .then(res => {
                 if (res['status'] === 200) {
-                    this.props.onLogin(res['token']);
+                    this.props.onRegister(res['token']);
                 } else {
                     this.setState({
                         error: res['message'],
@@ -45,7 +45,7 @@ class Login extends Component {
         return (
             <Fragment>
                 <div className="one-pager">
-                    <Title>Login</Title>
+                    <Title>Register</Title>
                     { this.state.error !== "" ? <Alert message={ this.state.error } type="error" /> : null }
 
                     <Form onFinish={values => this.onFormFinish(values)}>
@@ -55,9 +55,22 @@ class Login extends Component {
                         <Form.Item name="password" rules={[{ required: true }]} hasFeedback>
                             <Input.Password placeholder="Password" />
                         </Form.Item>
+                        <Form.Item name="password2" rules={[
+                            { required: true }, 
+                            ({ getFieldValue }) => ({
+                                validator(rule, value) {
+                                    if (!value || getFieldValue('password') === value) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject('The two passwords that you entered do not match!');
+                                },
+                            })
+                        ]}>
+                            <Input.Password placeholder="Confirm Password" />
+                        </Form.Item>
                         <Row>
-                            <Button type="primary" htmlType="submit">Sign in</Button>
-                            <Link className="form-link" to="/register">Register</Link>
+                            <Button type="primary" htmlType="submit">Register</Button>
+                            <Link className="form-link" to="/login">Login</Link>
                         </Row>
                     </Form>
                 </div>
@@ -66,4 +79,4 @@ class Login extends Component {
     }
 }
 
-export default Login;
+export default Register;
