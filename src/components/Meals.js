@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
-import { Alert, Avatar, List } from 'antd';
+import { Alert, Avatar, List, Modal } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import md5 from 'md5';
 
 import MealForm from './MealForm';
 
 import { ApiGetHeaders, FormatDate } from '../helpers';
 
-import md5 from 'md5';
-
 import './Meals.css';
+
+const { confirm } = Modal;
 
 class Meals extends Component {
     constructor(props) {
@@ -91,6 +93,7 @@ class Meals extends Component {
 
     addMeal(date, type) {
         console.log("addMeal", date, type);
+
         this.setState({
             activeMeal: {
                 id: 0,
@@ -106,7 +109,7 @@ class Meals extends Component {
     }
 
     editMeal(meal) {
-        console.log("EDIT", meal);
+        console.log("editMeal", meal);
 
         this.setState({
             activeMeal: {
@@ -119,72 +122,44 @@ class Meals extends Component {
             },
             modalIsVisible: true,
         });
-
-        return;
-        let url = "http://localhost:8000/api/meals/" + meal.id + "/";
-		
-		fetch(url, {
-			method: 'POST',
-			headers: ApiGetHeaders(),
-			body: JSON.stringify({
-                type: 1,
-                day: '2011-10-10',
-                recipe: 1,
-            })
-        })
-        .then(res => res.json())
-        .then(res => {
-            console.log(res);
-			if (res['status'] === 200) {
-                this.fetchMeals();
-
-				this.setState({
-                    message: {
-                        error: '',
-                        success: "Meal Edited!",
-                    }
-                });
-			} else {
-				this.setState({
-                    message: {
-                        error: res['message'],
-                        success: '',
-                    }
-                });
-			}
-		}).catch(error => {
-			console.log("error #2", error);
-		});
     }
 
 	deleteMeal(item) {
-        let url = "http://localhost:8000/api/meals/" + item.meal + "/";
 
-		fetch(url, {
-			method: 'DELETE',
-			headers: ApiGetHeaders(),
-        }).then(res => res.json())
-        .then(res => {
-			if (res['status'] === 200) {
-                this.fetchMeals();
+        confirm({
+            title: 'Do you Want to delete this items?',
+            icon: <ExclamationCircleOutlined />,
+            content: 'Deleted items cannot be restored.',
+            onOk: () => {
+                let url = "http://localhost:8000/api/meals/" + item.meal.id + "/";
 
-				this.setState({
-                    message: {
-                        error: '',
-                        success: "Meal deleted!",
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: ApiGetHeaders(),
+                }).then(res => res.json())
+                .then(res => {
+                    if (res['status'] === 200) {
+                        this.fetchMeals();
+        
+                        this.setState({
+                            message: {
+                                error: '',
+                                success: "Meal deleted!",
+                            }
+                        });
+                    } else {
+                        this.setState({
+                            message: {
+                                error: res['message'],
+                                success: '',
+                            }
+                        });
                     }
+                }).catch(error => {
+                    console.log("error #2", error);
                 });
-			} else {
-				this.setState({
-                    message: {
-                        error: res['message'],
-                        success: '',
-                    }
-                });
-			}
-		}).catch(error => {
-			console.log("error #2", error);
-		});
+            },
+          });
     }
     
     closeModal = e => {
