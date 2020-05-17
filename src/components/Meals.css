@@ -1,3 +1,7 @@
 .meal .ant-timeline-item-content {
     display: flex;
 }
+
+.date-next {
+    text-align: right;
+}

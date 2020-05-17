@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Link, Redirect, withRouter } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { Alert, Row, Form, Input, Button, Typography } from 'antd';
 
 import { ApiGetToken, ApiSetToken, GetCookie } from '../helpers';

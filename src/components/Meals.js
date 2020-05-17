@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { Alert, Avatar, List, Modal } from 'antd';
+import { Alert, Avatar, Button, Col, List, Modal, Row } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import md5 from 'md5';
 
 import MealForm from './MealForm';
 
-import { ApiGetHeaders, DateToString, FormatDate } from '../helpers';
+import { ApiGetHeaders, CreateDate, DateToString, DayToString, FormatDate } from '../helpers';
 
 import './Meals.css';
 
@@ -32,6 +32,7 @@ class Meals extends Component {
             mealTypes: [],
             modalIsVisible: false,
             mealsList: [],
+            daysList: [],
             activeMeal: {
                 id: 0,
                 day: '',
@@ -83,7 +84,7 @@ class Meals extends Component {
                 console.log("MEALS", res);
 				if (res['status'] === 200) {
 					this.setState({
-						mealsList: res['items'],
+						daysList: this.createDays(res['items']),
                     });
 				} else {
                     this.setState({
@@ -174,26 +175,38 @@ class Meals extends Component {
         this.fetchMeals();
     }
 
-    render() {
-
-        const daysLabel = {
-            1: "Lundi",
-            2: "Mardi",
-            3: "Mercredi",
-            4: "Jeudi",
-            5: "Vendredi",
-            6: "Samedi",
-            0: "Dimanche",
+    onChangeWeek(direction) {
+        let newDates = {
+            start: null,
+            end: null,
         };
-        
-        var d = new Date(this.state.dates.start);
+
+        var date = new Date(this.state.dates.start + " 12:00:00");
+        console.log(date);
+        date.setDate(date.getUTCDate() + direction);
+        console.log(date);
+        newDates.start = FormatDate(date);
+
+        date = new Date(this.state.dates.end + " 12:00:00");
+        date.setDate(date.getUTCDate() + direction);
+        newDates.end = FormatDate(date);
+
+        this.setState({
+            dates: newDates,
+        }, () => {
+            this.fetchMeals();
+        });
+    }
+
+    createDays(mealsList) {
+        var d = CreateDate(this.state.dates.start);
 
         let days = [];
         for(let i=0; i<7; i++) {
-            d.setDate(d.getDate()+1);
+            d.setDate(d.getDate() + (i==0 ? 0 : 1));
 
             let day = {
-                'day': daysLabel[d.getDay()],
+                'day': DayToString(d),
                 'date': {
                     'value': FormatDate(d),
                     'label': DateToString(d),
@@ -209,7 +222,7 @@ class Meals extends Component {
                 })
             });
 
-            this.state.mealsList.forEach(meal => {
+            mealsList.forEach(meal => {
                 if (meal.day === day.date.value) {
                     day.meals.forEach(day_meal => {
                         if (day_meal.type.id === meal.type.id) {
@@ -223,9 +236,22 @@ class Meals extends Component {
             days.push(day);
         }
 
+        return days;
+    }
+
+    render() {
+
+
         return (
             <div>
-
+                <Row>
+                    <Col span={12} className="date-back">
+                        <Button type="primary" onClick={ () => this.onChangeWeek(-7) }>&lt;</Button>
+                    </Col>
+                    <Col span={12} className="date-next">
+                        <Button type="primary" onClick={ () => this.onChangeWeek(7) }>&gt;</Button>
+                    </Col>
+                </Row>
                 <MealForm 
                     key={ md5( new Date().getTime() ) } 
                     day={ this.state.activeMeal.day } 
@@ -241,8 +267,8 @@ class Meals extends Component {
                 { this.state.message.error !== "" ? <Alert message={ this.state.message.error } type="error" /> : null }
                 { this.state.message.success !== "" ? <Alert message={ this.state.message.success } type="success" /> : null }
 
-                { days.map(day => {
-                    return (<List key={day.day}
+                { this.state.daysList.map(day => {
+                    return (<List key={day.date.value}
                     itemLayout="horizontal"
                     dataSource={day.meals}
                     header={<h3>{ day.day } - { day.date.label }</h3>}
