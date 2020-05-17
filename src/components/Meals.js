@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import { Alert, AutoComplete, Avatar, Button, DatePicker, Form, Input, List, Modal } from 'antd';
-
-import moment from 'moment';
+import { Alert, Avatar, List } from 'antd';
 
 import MealForm from './MealForm';
 
@@ -98,7 +96,7 @@ class Meals extends Component {
                 id: null,
                 date,
                 day: date,
-                type,
+                typeId: type,
                 recipe:'',
             },
             modalIsVisible: true,
@@ -176,6 +174,7 @@ class Meals extends Component {
         this.setState({
             modalIsVisible: false,
         });
+        this.fetchMeals();
     };
 
     render() {
@@ -231,11 +230,11 @@ class Meals extends Component {
 
             days.push(day);
         }
-console.log("URL:", this.state.meal.recipe.url, this.state.activeMeal.day);
+        console.log("RENDER", this.state);
         return (
             <div>
 
-                <MealForm day={ this.state.activeMeal.day } onClose={ () => this.closeModal() } isVisible={ this.state.modalIsVisible } />
+                <MealForm day={ this.state.activeMeal.day } isVisible={ this.state.modalIsVisible } typeId={ this.state.activeMeal.typeId } onClose={ () => this.closeModal() } />
 
                 { this.state.message.error !== "" ? <Alert message={ this.state.message.error } type="error" /> : null }
                 { this.state.message.success !== "" ? <Alert message={ this.state.message.success } type="success" /> : null }
@@ -248,15 +247,15 @@ console.log("URL:", this.state.meal.recipe.url, this.state.activeMeal.day);
                     renderItem={item => (
                     <List.Item actions={
                         item.recipe !== null ? [
-                            <a onClick={() => this.editMeal(item)}>Edit</a>, 
-                            <a onClick={() => this.deleteMeal(item)}>Delete</a>
+                            <div onClick={() => this.editMedivl(item)}>Edit</div>, 
+                            <div onClick={() => this.deleteMeal(item)}>Delete</div>
                         ] : [
-                            <a onClick={() => this.addMeal(day.date, 1)}>Add</a>
+                            <div onClick={() => this.addMeal(day.date, 2)}>Add</div>
                         ]
                     }>
                         <List.Item.Meta
                             avatar={ <Avatar>L</Avatar> }
-                            title={ <a>{ item.type }</a> }
+                            title={ <div>{ item.type }</div> }
                             description={ item.recipe ? item.recipe.name : "" }
                         />
                     </List.Item>

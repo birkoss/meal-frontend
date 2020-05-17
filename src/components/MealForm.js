@@ -1,31 +1,25 @@
 import React, { Component } from 'react';
-import { Alert, AutoComplete, Avatar, Button, DatePicker, Form, Input, List, Modal } from 'antd';
+import { AutoComplete, Button, DatePicker, Form, Input, Modal } from 'antd';
 
 import moment from 'moment';
 
 
-import { ApiGetHeaders, FormatDate } from '../helpers';
-
-const [form] = Form.useForm();
+import { ApiGetHeaders } from '../helpers';
 
 class MealForm extends Component {
     constructor(props) {
         super(props);
 
-        console.log(props);
         this.state = {
             recipesList: [],
-            recipe_url: "aa",
-            recipe_name: "",
+            recipe_url: '',
+            recipe_name: '',
             recipe_id: 0,
-            type_id: props.type_id,
-            day: props.day,
         };
     }
 
-    onFormFinish(values) {
-        console.log(values, this.state);
-        return;
+    createMeal(recipeId, typeId, day) {
+        console.log("createMeal", recipeId, typeId, day);
 
         let url = "http://localhost:8000/api/meals/";
 		
@@ -33,15 +27,15 @@ class MealForm extends Component {
 			method: 'POST',
 			headers: ApiGetHeaders(),
 			body: JSON.stringify({
-                type: values['type'],
-                day: values['day'],
-                recipe: values['recipe'],
+                type: typeId,
+                day: day,
+                recipe: recipeId,
             })
         })
             .then(res => res.json())
             .then(res => {
                 if (res['status'] === 200) {
-                    this.fetchMeals();
+                    this.props.onClose();
                     
                     this.setState({
                         message: {
@@ -57,6 +51,14 @@ class MealForm extends Component {
             .catch(error => {
                 console.log("error #2", error);
             });
+    }
+
+    onFormFinish(values) {
+        if (this.state.recipe_id === 0) {
+            alert("TO DO !!");
+        } else {
+            this.createMeal(this.state.recipe_id, values['type'], values['day'].format("YYYY-MM-DD"));
+        }
     }
 
     onSearch(value) {
@@ -106,6 +108,15 @@ class MealForm extends Component {
         });
     };
 
+    onFieldsChange(field, fields) {
+        console.log(field, fields);
+        /*
+        this.setState({
+          fields: { ...this.state.fields, ...changedFields },
+        });
+        */
+      }
+
     onSelect(value, option) {
         console.log("onSelect", value, option);
 
@@ -118,8 +129,15 @@ class MealForm extends Component {
         console.log(this.state, this.props);
     }
 
-    render() {
+    afterClose() {
+        this.setState({
+            recipe_url: '',
+            recipe_id: 0,
+        });
+    }
 
+    render() {
+        console.log(this.state);
         return (
             <Modal
                 destroyOnClose={true}
@@ -127,16 +145,16 @@ class MealForm extends Component {
                 visible={ this.props.isVisible }
                 onOk={ () => { this.processModal() } }
                 onCancel={ () => this.props.onClose() }
+                afterClose={ () => this.afterClose() }
                 footer={[
                     <Button key="back" onClick={ () => this.props.onClose() }>Annuler</Button>,
                     <Button htmlType="submit" form="meal-form" key="submit" type="primary">Enregistrer</Button>,
                 ]}
             >
 
-                <Form id="meal-form" onFinish={values => this.onFormFinish(values)} initialValues={ {
-                    day: moment(this.state.day),
-                    type: this.state.type_id,
-                    /* recipe_url: this.state.recipe_url, */
+                <Form id="meal-form" onFieldsChange={ (field, fields) => this.onFieldsChange(field, fields) } onFinish={values => this.onFormFinish(values)} initialValues={ {
+                    day: moment(this.props.day),
+                    type: this.props.typeId,
                 } }>
                     <Form.Item name="recipe-name" rules={[{ required: true }]} hasFeedback>
                         <AutoComplete 
@@ -146,11 +164,11 @@ class MealForm extends Component {
                             onSelect={ (value, option) => this.onSelect(value, option) }
                         />
                     </Form.Item>
-                    { this.state.recipe_id === 0 ? 
-                        <Form.Item name="recipe_url" rules={[{ required: true }]} hasFeedback>
-                            <Input placeholder="URL de la recette" value={this.state.recipe_url}/>
-                        </Form.Item>
-                        : "" }
+                    
+                    <Form.Item rules={[{ required: true }]} hasFeedback>
+                        <Input placeholder="URL de la recette" onChange={e => this.setState({recipe_url: e.target.value})} value={this.state.recipe_url}/>
+                    </Form.Item>
+                        
                     <Form.Item name="day" rules={[{ required: true }]} hasFeedback>
                         <DatePicker />
                     </Form.Item>
