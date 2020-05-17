@@ -14,6 +14,7 @@ class Meals extends Component {
         super(props);
 
         this.state = {
+            mealTypes: [],
             recipesList: [],
             modalIsVisible: false,
             mealsList: [],
@@ -39,7 +40,30 @@ class Meals extends Component {
     }
 
     componentDidMount() {
-        this.fetchMeals();
+        this.fetchMealTypes();
+    }
+
+    fetchMealTypes() {
+        fetch('http://localhost:8000/api/meal-types/', {
+            headers: ApiGetHeaders(),
+        })
+            .then(res => res.json())
+			.then(res => {
+				if (res['status'] === 200) {
+					this.setState({
+						mealTypes: res['items'],
+                    });
+
+                    this.fetchMeals();
+				} else {
+                    this.setState({
+                        message: {
+                            success: '',
+                            error: res['message'],
+                        }
+                    });
+				}
+			});
     }
 
     fetchMeals() {
@@ -195,25 +219,21 @@ class Meals extends Component {
             let day = {
                 'day': daysLabel[d.getDay()],
                 'date': FormatDate(d),
-                'meals': [{
-                    'type': 'breakfast',
-                    'recipe': null,
-                    'meal': null,
-                },{
-                    'type': 'dinner',
-                    'recipe': null,
-                    'meal': null,
-                },{
-                    'type': 'lunch',
-                    'recipe': null,
-                    'meal': null,
-                }]
+                'meals': [],
             };
+
+            this.state.mealTypes.forEach(type => {
+                day.meals.push({
+                    'type': type,
+                    'recipe': null,
+                    'meal': null,
+                })
+            });
 
             this.state.mealsList.forEach(meal => {
                 if (meal.day === day.date) {
                     day.meals.forEach(day_meal => {
-                        if (day_meal.type === meal.type.slug) {
+                        if (day_meal.type.id === meal.type.id) {
                             day_meal.recipe = meal.recipe;
                             day_meal.meal = meal;
                         }
@@ -253,12 +273,12 @@ class Meals extends Component {
                             <div onClick={() => this.editMeal(item)}>Edit</div>, 
                             <div onClick={() => this.deleteMeal(item)}>Delete</div>
                         ] : [
-                            <div onClick={() => this.addMeal(day.date, 2)}>Add</div>
+                            <div onClick={() => this.addMeal(day.date, item.type.id)}>Add</div>
                         ]
                     }>
                         <List.Item.Meta
                             avatar={ <Avatar>L</Avatar> }
-                            title={ <div>{ item.type }</div> }
+                            title={ <div>{ item.type.name }</div> }
                             description={ item.recipe ? item.recipe.name : "" }
                         />
                     </List.Item>
