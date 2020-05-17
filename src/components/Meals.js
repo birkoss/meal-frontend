@@ -284,7 +284,7 @@ class Meals extends Component {
                         <List.Item.Meta
                             avatar={ <Avatar>L</Avatar> }
                             title={ <div>{ item.type.name }</div> }
-                            description={ item.recipe ? item.recipe.name : "" }
+                            description={ item.recipe ? (item.recipe.url ? <a target="_blank" href={ item.recipe.url }>{ item.recipe.name }</a> : item.recipe.name) : "" }
                         />
                     </List.Item>
                     )}
