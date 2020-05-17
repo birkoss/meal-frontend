@@ -17,6 +17,8 @@ class MealForm extends Component {
             recipe_url: props['recipeUrl'],
             recipe_name: props['recipeName'],
             recipe_id: props['recipeId'],
+            typeId: props['typeId'],
+            day: props['day'],
         };
     }
 
@@ -61,7 +63,7 @@ class MealForm extends Component {
                 .then(res => res.json())
                 .then(res => {
                     if (res['status'] === 200) {
-                        this.updateMeal(res['item']['id'], values['type'], values['day'].format("YYYY-MM-DD"));
+                        this.updateMeal(res['item']['id'], this.state.typeId, this.state.day);
                     } else {
                         this.setState({
                             errorMessage: res['message'],
@@ -74,7 +76,7 @@ class MealForm extends Component {
                     });
                 });
         } else {
-            this.updateMeal(this.state.recipe_id, values['type'], values['day'].format("YYYY-MM-DD"));
+            this.updateMeal(this.state.recipe_id, this.state.typeId, this.state.day);
         }
     }
 
@@ -167,8 +169,6 @@ class MealForm extends Component {
                 { this.state.errorMessage !== "" ? <Alert message={ this.state.errorMessage } type="error" /> : null }
 
                 <Form id="meal-form" onFinish={values => this.onFormFinish(values)} initialValues={ {
-                    day: moment(this.props.day),
-                    type: this.props.typeId,
                     recipeName: this.state.recipe_name,
                 } }>
                     <Form.Item name="recipeName" rules={[{ required: true }]} hasFeedback>
@@ -183,13 +183,7 @@ class MealForm extends Component {
                     <Form.Item rules={[{ required: true }]} hasFeedback>
                         <Input placeholder="URL de la recette" onChange={e => this.setState({recipe_url: e.target.value})} value={this.state.recipe_url}/>
                     </Form.Item>
-                        
-                    <Form.Item name="day" rules={[{ required: true }]} hasFeedback>
-                        <DatePicker />
-                    </Form.Item>
-                    <Form.Item name="type" rules={[{ required: true }]} hasFeedback>
-                        <Input placeholder="type" />
-                    </Form.Item>
+
                 </Form>
             </Modal>
         );
