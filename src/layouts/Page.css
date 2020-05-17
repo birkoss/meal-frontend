@@ -1,8 +1,12 @@
-.ant-layout-content {
+.page .ant-layout-content {
     padding: 50px;
 }
 
-.ant-layout-content > .site-layout-content {
+.page .ant-layout-content > .site-layout-content {
     background-color: #ffffff;
     padding: 10px;
+}
+
+.page .ant-menu {
+    text-align: right;
 }

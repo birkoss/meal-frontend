@@ -22,17 +22,14 @@ class Page extends Component {
 
     render() {
         return (
-            <Layout className="layout">
+            <Layout className="page">
                 <Header>
                 <div className="logo" />
                 <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
                     <Menu.Item key="1">
-                        <Link to="/">Home</Link>
+                        <Link to="/">Meals</Link>
                     </Menu.Item>
-                    <Menu.Item key="2">
-                        <Link to="/dashboard">nav 2</Link>
-                    </Menu.Item>
-                    <Menu.Item key="3" onClick={() => this.onLogout()}>Logout</Menu.Item>
+                    <Menu.Item key="2" onClick={() => this.onLogout()}>Logout</Menu.Item>
                 </Menu>
                 </Header>
                 <Content>

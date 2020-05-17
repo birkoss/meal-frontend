@@ -21,10 +21,6 @@ class App extends Component {
 	onLogin(token) {
 		ApiSetToken(token);
 
-		this.setState({
-			token
-		});
-
 		this.props.history.push('/');
 	}
 
@@ -34,12 +30,12 @@ class App extends Component {
 				<Switch>
 					<Route path="/login">
 						<OnePager>
-							<Login onLogin={ token => this.onLogin(token) } />
+							<Login onLoginRedirect="/" />
 						</OnePager>
 					</Route>
 					<Route path="/register">
 						<OnePager>
-							<Register onRegister={ token => this.onLogin(token) } />
+							<Register onRegisterRedirect="/" />
 						</OnePager>
 					</Route>
 					<PrivateRoute path='/'>

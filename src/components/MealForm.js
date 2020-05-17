@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
-import { Alert, AutoComplete, Button, DatePicker, Form, Input, Modal } from 'antd';
-
-import moment from 'moment';
-
+import { Alert, AutoComplete, Button, Form, Input, Modal } from 'antd';
 
 import { ApiGetHeaders } from '../helpers';
 

@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Link, Redirect } from "react-router-dom";
+import { Link, Redirect, withRouter } from "react-router-dom";
 import { Alert, Row, Form, Input, Button, Typography } from 'antd';
 
 import { ApiGetToken, ApiSetToken, GetCookie } from '../helpers';
@@ -12,8 +12,13 @@ class Login extends Component {
 
         this.state = {
             error: '',
-            token: ApiGetToken(),
         };
+    }
+
+    componentDidMount() {
+        if (ApiGetToken() !== "") {
+            this.props.history.push(this.props.onLoginRedirect);
+        }
     }
 
     onFormFinish(values) {
@@ -32,10 +37,7 @@ class Login extends Component {
             .then(res => {
                 if (res['status'] === 200) {
                     ApiSetToken(res['token']);
-
-                    this.setState({
-                        token: res['token'],
-                    });
+                    this.props.history.push(this.props.onLoginRedirect);
                 } else {
                     this.setState({
                         error: res['message'],
@@ -47,34 +49,28 @@ class Login extends Component {
     }
 
     render() {
-        if (this.state.token !== '') {
-            return (
-                <Redirect to="/" />
-            );
-        } else {
-            return (
-                <Fragment>
-                    <div className="one-pager">
-                        <Title>Login</Title>
-                        { this.state.error !== "" ? <Alert message={ this.state.error } type="error" /> : null }
-    
-                        <Form onFinish={values => this.onFormFinish(values)}>
-                            <Form.Item name="email" rules={[{ required: true }]} hasFeedback>
-                                <Input type="email" placeholder="Email" />
-                            </Form.Item>
-                            <Form.Item name="password" rules={[{ required: true }]} hasFeedback>
-                                <Input.Password placeholder="Password" />
-                            </Form.Item>
-                            <Row>
-                                <Button type="primary" htmlType="submit">Sign in</Button>
-                                <Link className="form-link" to="/register">Register</Link>
-                            </Row>
-                        </Form>
-                    </div>
-                </Fragment>
-            );
-        }
+        return (
+            <Fragment>
+                <div className="one-pager">
+                    <Title>Login</Title>
+                    { this.state.error !== "" ? <Alert message={ this.state.error } type="error" /> : null }
+
+                    <Form onFinish={values => this.onFormFinish(values)}>
+                        <Form.Item name="email" rules={[{ required: true }]} hasFeedback>
+                            <Input type="email" placeholder="Email" />
+                        </Form.Item>
+                        <Form.Item name="password" rules={[{ required: true }]} hasFeedback>
+                            <Input.Password placeholder="Password" />
+                        </Form.Item>
+                        <Row>
+                            <Button type="primary" htmlType="submit">Sign in</Button>
+                            <Link className="form-link" to="/register">Register</Link>
+                        </Row>
+                    </Form>
+                </div>
+            </Fragment>
+        );
     }
 }
 
-export default Login;
+export default withRouter(Login);

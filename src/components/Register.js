@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import { Alert, Row, Form, Input, Button, Typography } from 'antd';
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 
-import { GetCookie } from '../helpers';
+import { GetCookie, ApiGetToken, ApiSetToken } from '../helpers';
 
 const { Title } = Typography;
 
@@ -13,6 +13,12 @@ class Register extends Component {
         this.state = {
             error: '',
         };
+    }
+
+    componentDidMount() {
+        if (ApiGetToken() !== "") {
+            this.props.history.push(this.props.onRegisterRedirect);
+        }
     }
 
     onFormFinish(values) {
@@ -30,7 +36,8 @@ class Register extends Component {
             .then(res => res.json())
             .then(res => {
                 if (res['status'] === 200) {
-                    this.props.onRegister(res['token']);
+                    ApiSetToken(res['token']);
+                    this.props.history.push(this.props.onRegisterRedirect);
                 } else {
                     this.setState({
                         error: res['message'],
@@ -79,4 +86,4 @@ class Register extends Component {
     }
 }
 
-export default Register;
+export default withRouter(Register);

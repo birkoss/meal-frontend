@@ -8,7 +8,7 @@ const { Content } = Layout;
 class OnePager extends Component {
     render() {
         return (
-            <Layout className="layout">
+            <Layout className="onepager">
                 <Content className="layout-onepager">
                     <div className="site-layout-content">
                         { this.props.children }
