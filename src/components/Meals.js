@@ -15,9 +15,21 @@ class Meals extends Component {
     constructor(props) {
         super(props);
 
+        // Find the first Monday of the current week
+        var date_start = new Date();
+        const dayOfWeek = date_start.getDay();
+        date_start.setDate(date_start.getDate()-dayOfWeek + 1);
+        
+        // Find the next Sunday of the current week
+        var date_end = new Date(date_start.getTime());
+        date_end.setDate(date_end.getDate() + 6);
+
         this.state = {
+            dates: {
+                start: FormatDate(date_start),
+                end: FormatDate(date_end),
+            },
             mealTypes: [],
-            recipesList: [],
             modalIsVisible: false,
             mealsList: [],
             activeMeal: {
@@ -28,17 +40,11 @@ class Meals extends Component {
                 recipeName: '',
                 typeId: 0,
             },
-            meal: {
-                id: null,
-                date: '',
-                type: 1,
-                recipe: '',
-            },
             message: {
                 error: "",
                 success: "",
             }
-        };
+        };        
     }
 
     componentDidMount() {
@@ -69,7 +75,7 @@ class Meals extends Component {
     }
 
     fetchMeals() {
-		fetch('http://localhost:8000/api/meals/', {
+		fetch('http://localhost:8000/api/meals/?start=' + this.state.dates.start + "&end=" + this.state.dates.end, {
             headers: ApiGetHeaders(),
         })
             .then(res => res.json())
@@ -89,7 +95,6 @@ class Meals extends Component {
 				}
 			});
 	}
-
 
     addMeal(date, type) {
         console.log("addMeal", date, type);
@@ -181,11 +186,7 @@ class Meals extends Component {
             0: "Dimanche",
         };
         
-        var d = new Date();
-        const dayOfWeek = d.getDay();
-
-        // Start at the first day of the week
-        d.setDate(d.getDate()-dayOfWeek);
+        var d = new Date(this.state.dates.start);
 
         let days = [];
         for(let i=0; i<7; i++) {
