@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
-import { Alert, Button, Row, Col, Timeline } from 'antd';
+import { Alert, AutoComplete, Avatar, Button, DatePicker, Form, Input, List, Modal } from 'antd';
 
+import moment from 'moment';
 
-import { ApiGetHeaders } from '../helpers';
+import MealForm from './MealForm';
+
+import { ApiGetHeaders, FormatDate } from '../helpers';
 
 import './Meals.css';
 
@@ -11,9 +14,17 @@ class Meals extends Component {
         super(props);
 
         this.state = {
+            recipesList: [],
+            modalIsVisible: false,
             mealsList: [],
+            activeMeal: {
+                day: '',
+            },
             meal: {
                 id: null,
+                date: '',
+                type: 1,
+                recipe: '',
             },
             message: {
                 error: "",
@@ -80,6 +91,20 @@ class Meals extends Component {
             });
     }
 
+    addMeal(date, type) {
+        console.log("addMeal", date, type);
+        this.setState({
+            activeMeal: {
+                id: null,
+                date,
+                day: date,
+                type,
+                recipe:'',
+            },
+            modalIsVisible: true,
+        });
+    }
+
     editMeal(meal) {
         let url = "http://localhost:8000/api/meals/" + meal.id + "/";
 		
@@ -117,8 +142,8 @@ class Meals extends Component {
 		});
     }
 
-	deleteMeal(meal) {
-        let url = "http://localhost:8000/api/meals/" + meal.id + "/";
+	deleteMeal(item) {
+        let url = "http://localhost:8000/api/meals/" + item.meal + "/";
 
 		fetch(url, {
 			method: 'DELETE',
@@ -145,45 +170,99 @@ class Meals extends Component {
 		}).catch(error => {
 			console.log("error #2", error);
 		});
-	}
-
+    }
+    
+    closeModal = e => {
+        this.setState({
+            modalIsVisible: false,
+        });
+    };
 
     render() {
+
+        const daysLabel = {
+            1: "Lundi",
+            2: "Mardi",
+            3: "Mercredi",
+            4: "Jeudi",
+            5: "Vendredi",
+            6: "Samedi",
+            0: "Dimanche",
+        };
+        
+        var d = new Date();
+        const dayOfWeek = d.getDay();
+
+        // Start at the first day of the week
+        d.setDate(d.getDate()-dayOfWeek);
+
+        let days = [];
+        for(let i=0; i<7; i++) {
+            d.setDate(d.getDate()+1);
+
+            let day = {
+                'day': daysLabel[d.getDay()],
+                'date': FormatDate(d),
+                'meals': [{
+                    'type': 'breakfast',
+                    'recipe': null,
+                    'meal': null,
+                },{
+                    'type': 'dinner',
+                    'recipe': null,
+                    'meal': null,
+                },{
+                    'type': 'lunch',
+                    'recipe': null,
+                    'meal': null,
+                }]
+            };
+
+            this.state.mealsList.forEach(meal => {
+                if (meal.day === day.date) {
+                    day.meals.forEach(day_meal => {
+                        if (day_meal.type === meal.type.slug) {
+                            day_meal.recipe = meal.recipe;
+                            day_meal.meal = meal.id;
+                        }
+                    });
+                }
+            });
+
+            days.push(day);
+        }
+console.log("URL:", this.state.meal.recipe.url, this.state.activeMeal.day);
         return (
             <div>
+
+                <MealForm day={ this.state.activeMeal.day } onClose={ () => this.closeModal() } isVisible={ this.state.modalIsVisible } />
+
                 { this.state.message.error !== "" ? <Alert message={ this.state.message.error } type="error" /> : null }
                 { this.state.message.success !== "" ? <Alert message={ this.state.message.success } type="success" /> : null }
-                <Row>
-                    <Col span={24}>
-                        <Button onClick={event => this.onAddClicked(event)} type="primary">Add</Button>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col span={24}>
-                        <Timeline>
-                        {
-                            this.state.mealsList.map(meal => {
-                                return (
-                                    <Timeline.Item key={meal.id} className="meal">
-                                        <div style={{ flex: 7 }}>
-                                            <span>{meal.day}</span>
-                                            <span>{meal.name}</span>
-                                        </div>
 
-                                        <div style={{ flex: 1 }}>
-                                            <button onClick={event => this.editMeal(meal)} className="btn btn-sm btn-outline-info">Edit</button>
-                                        </div>
-
-                                        <div style={{ flex: 1 }}>
-                                            <button onClick={event => this.deleteMeal(meal)} className="btn btn-sm btn-outline-dark delete">Delete</button>
-                                        </div>
-                                    </Timeline.Item>
-                                );
-                            })
-                        }
-                        </Timeline>
-                    </Col>
-                </Row>
+                { days.map(day => {
+                    return (<List key={day.day}
+                    itemLayout="horizontal"
+                    dataSource={day.meals}
+                    header={<h3>{ day.day }</h3>}
+                    renderItem={item => (
+                    <List.Item actions={
+                        item.recipe !== null ? [
+                            <a onClick={() => this.editMeal(item)}>Edit</a>, 
+                            <a onClick={() => this.deleteMeal(item)}>Delete</a>
+                        ] : [
+                            <a onClick={() => this.addMeal(day.date, 1)}>Add</a>
+                        ]
+                    }>
+                        <List.Item.Meta
+                            avatar={ <Avatar>L</Avatar> }
+                            title={ <a>{ item.type }</a> }
+                            description={ item.recipe ? item.recipe.name : "" }
+                        />
+                    </List.Item>
+                    )}
+                />)
+                })}
             </div>
         );
     }

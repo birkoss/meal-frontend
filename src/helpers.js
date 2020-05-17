@@ -23,3 +23,17 @@ export function ApiGetHeaders() {
         'Authorization': 'token ' + ApiGetToken(),
     };
 }
+
+
+export function FormatDate(d) {
+    let month = (d.getMonth() + 1);
+    let day = d.getDate();
+    let year = d.getFullYear();
+
+    if (month < 10) 
+        month = '0' + month;
+    if (day.length < 10) 
+        day = '0' + day;
+
+    return [year, month, day].join('-');
+}

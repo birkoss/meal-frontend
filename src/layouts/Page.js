@@ -5,6 +5,8 @@ import { Layout, Menu } from 'antd';
 
 import { ApiSetToken } from '../helpers';
 
+import './Page.css';
+
 const { Header, Content, Footer } = Layout;
 
 class Page extends Component {
@@ -33,7 +35,7 @@ class Page extends Component {
                     <Menu.Item key="3" onClick={() => this.onLogout()}>Logout</Menu.Item>
                 </Menu>
                 </Header>
-                <Content style={{ padding: '0 50px' }}>
+                <Content>
                     <div className="site-layout-content">
                         { this.props.children }
                     </div>

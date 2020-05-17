@@ -5,10 +5,6 @@ import { ApiGetToken } from '../helpers';
 
 
 class PrivateRoute extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         return (
             ApiGetToken() !== "" ? this.props.children : <Redirect to="/login" />

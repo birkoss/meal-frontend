@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Layout } from 'antd';
 
+import './OnePager.css';
+
 const { Content } = Layout;
 
 class OnePager extends Component {
