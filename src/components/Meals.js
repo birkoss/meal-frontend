@@ -5,7 +5,7 @@ import md5 from 'md5';
 
 import MealForm from './MealForm';
 
-import { ApiGetHeaders, FormatDate } from '../helpers';
+import { ApiGetHeaders, DateToString, FormatDate } from '../helpers';
 
 import './Meals.css';
 
@@ -193,7 +193,10 @@ class Meals extends Component {
 
             let day = {
                 'day': daysLabel[d.getDay()],
-                'date': FormatDate(d),
+                'date': {
+                    'value': FormatDate(d),
+                    'label': DateToString(d),
+                },
                 'meals': [],
             };
 
@@ -206,7 +209,7 @@ class Meals extends Component {
             });
 
             this.state.mealsList.forEach(meal => {
-                if (meal.day === day.date) {
+                if (meal.day === day.date.value) {
                     day.meals.forEach(day_meal => {
                         if (day_meal.type.id === meal.type.id) {
                             day_meal.recipe = meal.recipe;
@@ -241,14 +244,14 @@ class Meals extends Component {
                     return (<List key={day.day}
                     itemLayout="horizontal"
                     dataSource={day.meals}
-                    header={<h3>{ day.day }</h3>}
+                    header={<h3>{ day.day } - { day.date.label }</h3>}
                     renderItem={item => (
                     <List.Item actions={
                         item.recipe !== null ? [
                             <div onClick={() => this.editMeal(item)}>Edit</div>, 
                             <div onClick={() => this.deleteMeal(item)}>Delete</div>
                         ] : [
-                            <div onClick={() => this.addMeal(day.date, item.type.id)}>Add</div>
+                            <div onClick={() => this.addMeal(day.date.value, item.type.id)}>Add</div>
                         ]
                     }>
                         <List.Item.Meta
