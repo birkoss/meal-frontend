@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AutoComplete, Button, DatePicker, Form, Input, Modal } from 'antd';
+import { Alert, AutoComplete, Button, DatePicker, Form, Input, Modal } from 'antd';
 
 import moment from 'moment';
 
@@ -11,6 +11,7 @@ class MealForm extends Component {
         super(props);
 
         this.state = {
+            errorMessage: '',
             recipesList: [],
             recipe_url: '',
             recipe_name: '',
@@ -55,7 +56,29 @@ class MealForm extends Component {
 
     onFormFinish(values) {
         if (this.state.recipe_id === 0) {
-            alert("TO DO !!");
+            fetch("http://localhost:8000/api/recipes/", {
+                method: 'POST',
+                headers: ApiGetHeaders(),
+                body: JSON.stringify({
+                    name: values['recipe-name'],
+                    url: this.state.recipe_url,
+                })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (res['status'] === 200) {
+                        this.createMeal(res['item']['id'], values['type'], values['day'].format("YYYY-MM-DD"));
+                    } else {
+                        this.setState({
+                            errorMessage: res['message'],
+                        });
+                    }
+                })
+                .catch(error => {
+                    this.setState({
+                        errorMessage: "Erreur!",
+                    });
+                });
         } else {
             this.createMeal(this.state.recipe_id, values['type'], values['day'].format("YYYY-MM-DD"));
         }
@@ -108,15 +131,6 @@ class MealForm extends Component {
         });
     };
 
-    onFieldsChange(field, fields) {
-        console.log(field, fields);
-        /*
-        this.setState({
-          fields: { ...this.state.fields, ...changedFields },
-        });
-        */
-      }
-
     onSelect(value, option) {
         console.log("onSelect", value, option);
 
@@ -137,7 +151,6 @@ class MealForm extends Component {
     }
 
     render() {
-        console.log(this.state);
         return (
             <Modal
                 destroyOnClose={true}
@@ -152,7 +165,9 @@ class MealForm extends Component {
                 ]}
             >
 
-                <Form id="meal-form" onFieldsChange={ (field, fields) => this.onFieldsChange(field, fields) } onFinish={values => this.onFormFinish(values)} initialValues={ {
+                { this.state.errorMessage !== "" ? <Alert message={ this.state.errorMessage } type="error" /> : null }
+
+                <Form id="meal-form" onFinish={values => this.onFormFinish(values)} initialValues={ {
                     day: moment(this.props.day),
                     type: this.props.typeId,
                 } }>

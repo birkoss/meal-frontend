@@ -41,7 +41,7 @@ class Meals extends Component {
         })
             .then(res => res.json())
 			.then(res => {
-                console.log(res);
+                console.log("MEALS", res);
 				if (res['status'] === 200) {
 					this.setState({
 						mealsList: res['items'],
@@ -57,37 +57,6 @@ class Meals extends Component {
 			});
 	}
 
-    onAddClicked(event) {
-        let url = "http://localhost:8000/api/meals/";
-		
-		fetch(url, {
-			method: 'POST',
-			headers: ApiGetHeaders(),
-			body: JSON.stringify({
-                type: 1,
-                day: '2010-10-10',
-                recipe: 1,
-            })
-        })
-            .then(res => res.json())
-            .then(res => {
-                if (res['status'] === 200) {
-                    this.fetchMeals();
-                    
-                    this.setState({
-                        message: {
-                            error: '',
-                            success: "Meal added!",
-                        }
-                    });
-                } else {
-                    console.log("error #1", res);	
-                }
-            })
-            .catch(error => {
-                console.log("error #2", error);
-            });
-    }
 
     addMeal(date, type) {
         console.log("addMeal", date, type);
