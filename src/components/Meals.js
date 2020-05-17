@@ -162,12 +162,12 @@ class Meals extends Component {
           });
     }
     
-    closeModal = e => {
+    closeModal() {
         this.setState({
             modalIsVisible: false,
         });
         this.fetchMeals();
-    };
+    }
 
     render() {
 
