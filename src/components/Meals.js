@@ -5,6 +5,8 @@ import MealForm from './MealForm';
 
 import { ApiGetHeaders, FormatDate } from '../helpers';
 
+import md5 from 'md5';
+
 import './Meals.css';
 
 class Meals extends Component {
@@ -16,7 +18,12 @@ class Meals extends Component {
             modalIsVisible: false,
             mealsList: [],
             activeMeal: {
+                id: 0,
                 day: '',
+                recipeId: 0,
+                recipeUrl: '',
+                recipeName: '',
+                typeId: 0,
             },
             meal: {
                 id: null,
@@ -62,17 +69,34 @@ class Meals extends Component {
         console.log("addMeal", date, type);
         this.setState({
             activeMeal: {
-                id: null,
+                id: 0,
                 date,
                 day: date,
                 typeId: type,
-                recipe:'',
+                recipeId: 0,
+                recipeUrl: '',
+                recipeName: '',
             },
             modalIsVisible: true,
         });
     }
 
     editMeal(meal) {
+        console.log("EDIT", meal);
+
+        this.setState({
+            activeMeal: {
+                id: meal.meal.id,
+                day: meal.meal.day,
+                typeId: meal.meal.type.id,
+                recipeId: meal.meal.recipe.id,
+                recipeUrl: meal.meal.recipe.url,
+                recipeName: meal.meal.recipe.name,
+            },
+            modalIsVisible: true,
+        });
+
+        return;
         let url = "http://localhost:8000/api/meals/" + meal.id + "/";
 		
 		fetch(url, {
@@ -191,7 +215,7 @@ class Meals extends Component {
                     day.meals.forEach(day_meal => {
                         if (day_meal.type === meal.type.slug) {
                             day_meal.recipe = meal.recipe;
-                            day_meal.meal = meal.id;
+                            day_meal.meal = meal;
                         }
                     });
                 }
@@ -199,11 +223,21 @@ class Meals extends Component {
 
             days.push(day);
         }
-        console.log("RENDER", this.state);
+
         return (
             <div>
 
-                <MealForm day={ this.state.activeMeal.day } isVisible={ this.state.modalIsVisible } typeId={ this.state.activeMeal.typeId } onClose={ () => this.closeModal() } />
+                <MealForm 
+                    key={ md5( new Date().getTime() ) } 
+                    day={ this.state.activeMeal.day } 
+                    isVisible={ this.state.modalIsVisible } 
+                    typeId={ this.state.activeMeal.typeId } 
+                    recipeId={ this.state.activeMeal.recipeId }
+                    recipeUrl={ this.state.activeMeal.recipeUrl }
+                    recipeName={ this.state.activeMeal.recipeName }
+                    mealId={ this.state.activeMeal.id }
+                    onClose={ () => this.closeModal() }
+                />
 
                 { this.state.message.error !== "" ? <Alert message={ this.state.message.error } type="error" /> : null }
                 { this.state.message.success !== "" ? <Alert message={ this.state.message.success } type="success" /> : null }
@@ -216,7 +250,7 @@ class Meals extends Component {
                     renderItem={item => (
                     <List.Item actions={
                         item.recipe !== null ? [
-                            <div onClick={() => this.editMedivl(item)}>Edit</div>, 
+                            <div onClick={() => this.editMeal(item)}>Edit</div>, 
                             <div onClick={() => this.deleteMeal(item)}>Delete</div>
                         ] : [
                             <div onClick={() => this.addMeal(day.date, 2)}>Add</div>

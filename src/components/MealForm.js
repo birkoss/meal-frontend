@@ -13,16 +13,18 @@ class MealForm extends Component {
         this.state = {
             errorMessage: '',
             recipesList: [],
-            recipe_url: '',
-            recipe_name: '',
-            recipe_id: 0,
+            mealId: props['mealId'],
+            recipe_url: props['recipeUrl'],
+            recipe_name: props['recipeName'],
+            recipe_id: props['recipeId'],
         };
     }
 
-    createMeal(recipeId, typeId, day) {
-        console.log("createMeal", recipeId, typeId, day);
-
+    updateMeal(recipeId, typeId, day) {
         let url = "http://localhost:8000/api/meals/";
+        if (this.state.mealId !== 0) {
+            url = "http://localhost:8000/api/meals/" + this.state.mealId + "/";
+        }
 		
 		fetch(url, {
 			method: 'POST',
@@ -37,14 +39,6 @@ class MealForm extends Component {
             .then(res => {
                 if (res['status'] === 200) {
                     this.props.onClose();
-                    
-                    this.setState({
-                        message: {
-                            error: '',
-                            success: "Meal added!",
-                        },
-                        modalIsVisible: false,
-                    });
                 } else {
                     console.log("error #1", res);	
                 }
@@ -60,14 +54,14 @@ class MealForm extends Component {
                 method: 'POST',
                 headers: ApiGetHeaders(),
                 body: JSON.stringify({
-                    name: values['recipe-name'],
+                    name: values['recipeName'],
                     url: this.state.recipe_url,
                 })
             })
                 .then(res => res.json())
                 .then(res => {
                     if (res['status'] === 200) {
-                        this.createMeal(res['item']['id'], values['type'], values['day'].format("YYYY-MM-DD"));
+                        this.updateMeal(res['item']['id'], values['type'], values['day'].format("YYYY-MM-DD"));
                     } else {
                         this.setState({
                             errorMessage: res['message'],
@@ -80,7 +74,7 @@ class MealForm extends Component {
                     });
                 });
         } else {
-            this.createMeal(this.state.recipe_id, values['type'], values['day'].format("YYYY-MM-DD"));
+            this.updateMeal(this.state.recipe_id, values['type'], values['day'].format("YYYY-MM-DD"));
         }
     }
 
@@ -94,12 +88,12 @@ class MealForm extends Component {
         });
 
         if (value) {
-            this.searchResult(value);
+            this.searchRecipes(value);
         }
     }
 
-    searchResult(query) {
-        console.log("searchResult", query);
+    searchRecipes(query) {
+        console.log("searchRecipes", query);
         let url = "http://localhost:8000/api/recipes/search/?search=" + query;
         console.log(this);
 
@@ -109,9 +103,12 @@ class MealForm extends Component {
         })
             .then(res => res.json())
             .then(res => {
-                console.log("searchResult", "DONE", res);
+                console.log("searchRecipes", "DONE", res);
                 this.setState({
                     recipesList: res['items'].map(item => {
+                        if (item.name.toLowerCase() === query.toLowerCase()) {
+                            this.selectExistingRecipe(item);
+                        }
                         return {
                             value: item.name,
                             label: item.name,
@@ -131,16 +128,18 @@ class MealForm extends Component {
         });
     };
 
+    selectExistingRecipe(recipe) {
+        this.setState({
+            recipe_url: recipe.url,
+            recipe_name: recipe.name,
+            recipe_id: recipe.id,
+        });
+    }
+
     onSelect(value, option) {
         console.log("onSelect", value, option);
 
-        this.setState({
-            recipe_url: option.recipe.url,
-            recipe_name: option.recipe.name,
-            recipe_id: option.recipe.id,
-        });
-        
-        console.log(this.state, this.props);
+        this.selectExistingRecipe(option.recipe);
     }
 
     afterClose() {
@@ -170,8 +169,9 @@ class MealForm extends Component {
                 <Form id="meal-form" onFinish={values => this.onFormFinish(values)} initialValues={ {
                     day: moment(this.props.day),
                     type: this.props.typeId,
+                    recipeName: this.state.recipe_name,
                 } }>
-                    <Form.Item name="recipe-name" rules={[{ required: true }]} hasFeedback>
+                    <Form.Item name="recipeName" rules={[{ required: true }]} hasFeedback>
                         <AutoComplete 
                             placeholder="Nom de la recette" 
                             options={ this.state.recipesList } 
